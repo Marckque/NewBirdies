@@ -5,8 +5,11 @@ using System.Collections.Generic;
 
 public class Inventory : MonoBehaviour
 {
+    [Header("UI")]
     [SerializeField]
     private Text currentItemText;
+
+    [Header("Items")]
     [SerializeField]
     private Transform itemsContainer;
     [SerializeField, Range(1, 5)]
@@ -96,7 +99,7 @@ public class Inventory : MonoBehaviour
 
         if (currentItem)
         {
-            currentItem.Activate();
+            currentItem.OnActivation();
         }
     }
 
@@ -118,7 +121,7 @@ public class Inventory : MonoBehaviour
         {
             if (item)
             {
-                item.Deactivate();
+                item.OnDeactivation();
             }
         }
     }
