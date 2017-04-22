@@ -2,80 +2,31 @@
 using System.Collections;
 using System.Collections.Generic;
 
-[System.Serializable]
-public class BoidDebug
-{
-    public bool seeDesiredVelocity;
-    public bool seeTargetVelocity;
-    public bool seeBoidAvoidanceVelocity;
-}
-
 public class Boid : MonoBehaviour
 {
-    public BoidDebug bdDbg;
-    public Transform m_Target;
-    public float m_Speed;
-    public float minSpeed;
-    public float m_MinimumDistanceToOtherBoid;
+    [SerializeField, Range(0f, 10f)]
+    private float maxVelocity;
 
-    private Vector3 m_TargetVelocity;
-    public List<Boid> m_OtherBoids = new List<Boid>();
-    private Vector3 m_BoidAvoidanceVelocity;
-    private Vector3 m_DesiredVelocity;
+    private Vector3 acceleration;
+    public Vector3 Velocity { get; private set; }
 
     protected void Update()
     {
-        SetAllVelocities();
-
-        if (bdDbg.seeDesiredVelocity) Debug.DrawRay(transform.position, m_DesiredVelocity, Color.green);
-
-        if (m_DesiredVelocity.magnitude > minSpeed)
-        {
-            transform.Translate(m_DesiredVelocity.normalized * m_Speed * Time.deltaTime);
-        }
-
-        ResetVelocities();
+        ApplyForce();
     }
 
-    private void AddAcceleration(Vector3 force)
+    public void Acceleration(Vector3 force)
     {
-        m_DesiredVelocity += force;
+        acceleration += force;
     }
 
-    private void ResetVelocities()
+    public void ApplyForce()
     {
-        m_TargetVelocity = Vector3.zero;
-        m_BoidAvoidanceVelocity = Vector3.zero;
-    }
+        Velocity = acceleration;
+        Velocity = Vector3.ClampMagnitude(Velocity, maxVelocity);
 
-    private void SetAllVelocities()
-    {
-        TargetVelocity();
-        BoidAvoidanceVelocity();
-    }
+        transform.Translate(Velocity);
 
-    private void TargetVelocity()
-    {
-        m_TargetVelocity = m_Target.position - transform.position;
-
-        if (bdDbg.seeTargetVelocity) Debug.DrawRay(transform.position, m_TargetVelocity, Color.magenta);
-        
-        AddAcceleration(m_TargetVelocity);
-    }
-
-    private void BoidAvoidanceVelocity()
-    {
-        foreach(Boid boid in m_OtherBoids)
-        {
-            Vector3 boidDifference = transform.position - boid.transform.position;
-            if (boidDifference.sqrMagnitude < m_MinimumDistanceToOtherBoid)
-            {
-                m_BoidAvoidanceVelocity += boidDifference;
-            }
-        }
-
-        if (bdDbg.seeBoidAvoidanceVelocity) Debug.DrawRay(transform.position, m_BoidAvoidanceVelocity, Color.cyan);
-
-        AddAcceleration(m_BoidAvoidanceVelocity);
+        acceleration = Vector3.zero;
     }
 }
